@@ -1,0 +1,6 @@
+model/data/
+*.h5
+*.csv
+node_modules/
+.venv/
+.venv-1/
