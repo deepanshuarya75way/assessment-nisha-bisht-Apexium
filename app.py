@@ -33,7 +33,7 @@ def predict():
     score=float(np.mean(gray<60))
     return jsonify({"is_oil_spill":score >0.15,"spill detected":score>0.15,"confidence":score})
 
-@app.route("/find_vessels",methods=["POST"])
+@app.route("/find_vesslesvessels",methods=["POST"])
 def vessels():
      d=request.get_json(silent=True)or {}
      if any(d.get(K) in (None,"")for K in ("latitude","longitude","acquisition_time")):
