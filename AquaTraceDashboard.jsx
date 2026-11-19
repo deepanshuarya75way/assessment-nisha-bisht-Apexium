@@ -173,6 +173,11 @@ export default function AquaTraceDashboard() {
   const [mapMode, setMapMode] = useState("SAR");
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState(null);
+  const [sceneLat, setSceneLat] = useState("");
+  const [sceneLon, setSceneLon] = useState("");
+  const [sceneTime, setSceneTime]= useState("");
+  const [sceneError, setSceneError]= useState(null);
+  const [matchedScene, setMatchedScene]= useState(null);
   const fileInputRef = useRef(null);
 
   const selected = incidents.find((i) => i.id === selectedId) || incidents[0];
@@ -189,6 +194,16 @@ export default function AquaTraceDashboard() {
   );
 
   async function runLiveDetection(file) {
+    if (sceneLat===""|| scenelon===""||!sceneTime){
+      setSceneError("Enter latitude,longitude and acqusition time first.");
+      return;
+    }
+    const la= Number(sceneLat), lo =Number(sceneLon);
+    if (isNaN(la)||isNaN(lo)||la<-90||la<-180||lo>180){
+      setSceneError("Latitude must be-90 to 90 and longitude -180 to 180.");
+      return;
+    }
+    setSceneError("");
     setLoading(true);
     setApiError(null);
     try {
@@ -204,9 +219,10 @@ export default function AquaTraceDashboard() {
 
       // Simulated spill coordinates for the vessel search — in a full system
       // these would come from the SAR scene's geolocation metadata.
-      const spillLat = 28.5;
-      const spillLon = -90.0;
-      const detectedAt = "2023-01-28 12:00:00";
+      const spillLat = Number(sceneLat);
+      const spillLon = Number(sceneLon);
+      const detectedAt = sceneTime;
+      setMatchedScene({lat:spillLat,lon:spillLon, time:detectedAt});
 
       let candidateVessels = [];
       if (predictData.is_oil_spill) {
@@ -354,6 +370,11 @@ export default function AquaTraceDashboard() {
           </div>
 
           <div className="flex items-center gap-3">
+            <input type="number" step ="any" placeholder="Latitude" value={sceneLat} onChange={e => setSceneLat(e.target.value)}/>
+             <input type="number" step ="any" placeholder="Longitude" value={sceneLon} onChange={e => setSceneLat(e.target.value)}/>
+             <input type="datetime-local" value={sceneTime} onChange={e=>setSceneTime(e.target.value)}/>
+             {sceneError && <p> style ={{ color: "red"}}{sceneError} </p>}
+             {matchedScene && <p>Matched at {matchedScene.lat}, {matchedScene.lon} on {matchedScene.time}</p>}
             <input
               ref={fileInputRef}
               type="file"
